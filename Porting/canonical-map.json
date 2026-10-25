@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "package": "swift-ai-cohere",
+  "status": "coarse-import",
+  "upstream": [
+    {
+      "name": "@ai-sdk/cohere",
+      "implementation": [
+        "packages/cohere/src"
+      ],
+      "tests": [
+        "packages/cohere/src/cohere-chat-language-model.test.ts",
+        "packages/cohere/src/cohere-embedding-model.test.ts",
+        "packages/cohere/src/cohere-prepare-tools.test.ts",
+        "packages/cohere/src/convert-to-cohere-chat-prompt.test.ts",
+        "packages/cohere/src/lazy-schemas.test.ts",
+        "packages/cohere/src/reranking/cohere-reranking-model.test.ts"
+      ]
+    }
+  ],
+  "swift": {
+    "sources": [
+      "Packages/swift-ai-cohere/Sources/SwiftAICohere/CohereEmbeddingRerankingModels.swift",
+      "Packages/swift-ai-cohere/Sources/SwiftAICohere/CohereLanguageModel.swift",
+      "Packages/swift-ai-cohere/Sources/SwiftAICohere/CohereProvider.swift"
+    ],
+    "tests": [
+      "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereProviderOptionSchemaTests.swift",
+      "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereStreamingAndOptionsTests.swift",
+      "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereTests.swift",
+      "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/FixtureDownloadTransport.swift",
+      "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/TestSupport.swift"
+    ],
+    "resources": []
+  },
+  "differences": [
+    {
+      "kind": "native-adaptation",
+      "reason": "Preserve Swift async/await, Sendable, Foundation transport and existing documented gaps; see Docs/CoreV6Parity.md and PortingStatus.md."
+    }
+  ],
+  "reviewNote": "M6: Cohere runtime and focused upstream-derived tests own their package; HTTP construction is shared, options and wire policy remain local. Prior baselines and known gaps are retained."
+}

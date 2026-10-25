@@ -1,0 +1,18 @@
+[
+  {
+    "order": 13,
+    "providerID": "cohere",
+    "upstreamPackage": "@ai-sdk/cohere",
+    "factoryNames": [
+      "AIProviders.cohere"
+    ],
+    "capabilities": [
+      "language",
+      "embedding",
+      "reranking"
+    ],
+    "files": false,
+    "skills": false,
+    "notes": "Cohere mirrors upstream 4.0.69: `COHERE_API_KEY`, custom base URL and headers, versioned user-agent suffix, callable/language aliases, embedding/textEmbedding aliases, reranking aliases, chat `/v2/chat`, embedding `/v2/embed`, reranking `/v2/rerank`, prompt conversion for text/images/documents/tool calls, providerOptions.cohere schemas, top-level reasoning to Cohere `thinking` budget mapping, providerOptions thinking precedence, response format and tool choice mapping, streaming lifecycle/tool-call/reasoning parts, response metadata with complete raw usage, embedding/reranking response bodies, object-document reranking warnings, and unsupported non-text document media. ProviderV4 type names, ESM-only packaging, Node 22 engines, TypeScript option export renames, optional JS headers config, and workflow serialization helpers are JS-only upstream concerns. The 2026-10-11 pass: Embeddings select float, int8, uint8, binary or ubinary responses, support 768/2048 dimensions and common-dimension defaults; chat retains cached token accounting."
+  }
+]

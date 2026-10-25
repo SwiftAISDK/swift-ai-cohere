@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "name": "@ai-sdk/cohere",
+      "reviewedVersion": "4.0.69",
+      "ledgerKind": "provider",
+      "evidence": "`AIProviders.cohere`, `CohereLanguageModel`, `CohereEmbeddingModel`, `CohereRerankingModel`, `CohereMistralVoyageTests.swift`",
+      "reviewStatus": "imported-reviewed-with-gaps",
+      "archiveIntegrity": "sha512-cpnMPip0uyaC6mBC+NGPT/GVXL85Nstdjem1EbKKTtyD6wvz/JoCU07YpoqNG0NWCVyrT8Zd0mUkp0tveObZoA==",
+      "sourceRef": "npm:@ai-sdk/cohere@4.0.69",
+      "testRef": "682e2dd71456f14f9da33a1b983d1998c3a1184c",
+      "testRefRelationship": "inventory-snapshot-not-release-verified",
+      "contractFamilies": [],
+      "contractReview": "not-imported; inspect upstream declarations before extraction"
+    }
+  ]
+}
