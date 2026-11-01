@@ -1,41 +1,46 @@
 {
   "schemaVersion": 1,
   "package": "swift-ai-cohere",
-  "version": "1.0.0",
-  "releaseID": "modular-3",
+  "version": "1.1.0",
+  "releaseID": "weekly-upstream-20261101",
   "source": {
-    "commit": "7fc9b4cd72f8f83b75ba7eee2e38d37127539317",
-    "baseCommit": "7fc9b4cd72f8f83b75ba7eee2e38d37127539317",
+    "commit": "ea057797494ab9bb66df8c6bfd8edc10245b20e7",
+    "baseCommit": "ea057797494ab9bb66df8c6bfd8edc10245b20e7",
     "workingTree": false,
-    "inputsSHA256": "49b802ba4a30454f78c9886ab3114537ef659ab3e6db7775479b7351f6e3f0ab"
+    "inputsSHA256": "b46f3e07b0a583d6fee81035987d74a06fc5c6109cbdf228144d1172d2c3676e"
   },
   "dependencies": [
     {
       "package": "swift-ai-core",
-      "from": "1.1.0"
+      "from": "1.2.0"
     }
   ],
   "changes": [
     {
-      "id": "remaining-package-extraction",
-      "notes": "Extract the existing runtime, typed settings and standalone tests from the compatibility aggregate. Preserve the reviewed npm baseline and existing capability/gap boundaries.",
-      "compatibility": "Initial independent Swift package version. Existing SwiftAISDK entry points remain in the development compatibility facade; no npm-version equivalence is implied."
+      "id": "weekly-upstream-20261101",
+      "notes": "Native UTF-8 Data document conversion already covers upstream byte/base64 decoding; new fixtures prove Unicode and literal base64-looking text preserve the intended text/title. Portable thinking remains enabled when no budget can be mapped; it retains the warning and omits an invented budget. Reviewed upstream: @ai-sdk/cohere 4.0.69 to 4.0.73. Validation passed: node Scripts/test-packages.mjs (all 52 owning package suites and the compatibility facade); node Scripts/sdk.mjs generate --check; node --test Scripts/tests/*.test.cjs (27 passed); docs-site check and build (100 pages). Live provider calls were not run.",
+      "compatibility": "Minor release for additive native API; existing static settings and call sites remain compatible. Updated direct dependency minimums are recorded in the manifest. Existing documented JS/framework and native product gaps remain; version-delta review does not imply full parity or live-service testing. Explicit custom authentication skips an unused credential supplier, a deliberate native callback-order adaptation."
     }
   ],
   "canonicalDirectory": "Packages/swift-ai-cohere",
   "upstream": [
     {
       "name": "@ai-sdk/cohere",
-      "reviewedVersion": "4.0.69",
+      "reviewedVersion": "4.0.73",
       "ledgerKind": "provider",
-      "evidence": "`AIProviders.cohere`, `CohereLanguageModel`, `CohereEmbeddingModel`, `CohereRerankingModel`, `CohereMistralVoyageTests.swift`",
+      "evidence": "`AIProviders.cohere`, `CohereLanguageModel`, `CohereEmbeddingModel`, `CohereRerankingModel`, `CohereMistralVoyageTests.swift`; 2026-11-01 delta: Docs/WeeklyUpstreamAudit20261101.json",
       "reviewStatus": "imported-reviewed-with-gaps",
-      "archiveIntegrity": "sha512-cpnMPip0uyaC6mBC+NGPT/GVXL85Nstdjem1EbKKTtyD6wvz/JoCU07YpoqNG0NWCVyrT8Zd0mUkp0tveObZoA==",
-      "sourceRef": "npm:@ai-sdk/cohere@4.0.69",
-      "testRef": "682e2dd71456f14f9da33a1b983d1998c3a1184c",
-      "testRefRelationship": "inventory-snapshot-not-release-verified",
-      "contractFamilies": [],
-      "contractReview": "not-imported; inspect upstream declarations before extraction"
+      "archiveIntegrity": "sha512-zsF4pg1Ssnnc1OCwjTt7wJwNQp2jsIm+/dBE+B5OcB+on9EUkBWvk4lfFYjdztP71nvVuGkAkf7BonQEhVpo7w==",
+      "sourceRef": "npm:@ai-sdk/cohere@4.0.73",
+      "testRef": "9b603d36186b75e58d5479445a96c76f6e2d2700",
+      "testRefRelationship": "matching-release",
+      "contractFamilies": [
+        "EmbeddingModelV4",
+        "LanguageModelV4",
+        "ProviderV4",
+        "RerankingModelV4"
+      ],
+      "contractReview": "2026-11-01: published declarations, source and exact matching-release changed tests reviewed; scoped dispositions and Swift translations are in Docs/WeeklyUpstreamAudit20261101.json. Existing broader product gaps remain; reviewed delta is not full-package parity."
     }
   ],
   "note": "Independent port. Imported test refs and contract review gaps retain their original status; export is not new upstream parity proof.",
@@ -54,7 +59,7 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Porting/map.json",
-      "sha256": "08075e7cfd90c07af545cfce83b8b5c870a6ed3e7e56b973f443e7648dc92987"
+      "sha256": "edcb8a2248378bca16ed945633944da9f02f742bb903b83e03c50682e5450e65"
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/README.md",
@@ -66,11 +71,11 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Sources/SwiftAICohere/CohereLanguageModel.swift",
-      "sha256": "0646cd44bb2a18147002ef31feda381d99b6b029be848d2f81513080b2acda63"
+      "sha256": "6242cafa75c89d3fdb22de9e72f5500c8e7a493adf9c0d5f6ecf9751b7b1146f"
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Sources/SwiftAICohere/CohereProvider.swift",
-      "sha256": "4fe3a7c29eedccdc1c66d3d1882854d0cf8158d3b3f57e7a0f5a0447a71e24ab"
+      "sha256": "a034c831f4cd6d9c25676e775022d74828a901e37bb8588baf837a8923d12d54"
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereProviderOptionSchemaTests.swift",
@@ -82,7 +87,7 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereTests.swift",
-      "sha256": "cc0d2af134d7cf3cd266265203d7098000668d70601ea5444454181622bf293c"
+      "sha256": "c2b054921c46bcd9a189839bf3d8633bab859f7a1cdd11e030e29829b93456f6"
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/FixtureDownloadTransport.swift",
@@ -91,6 +96,14 @@
     {
       "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/TestSupport.swift",
       "sha256": "dba7295dc5313e7d39723c001945e4bf653a326656cfb7e59f31221f930f02fb"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/Weekly20261101BehaviorTests.swift",
+      "sha256": "88301a7be122a3944f63513327e6e7b64951be60f48044f8b4e8b6f8395f1805"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/Weekly20261101CredentialsTests.swift",
+      "sha256": "b98101c461803527437970375d9b23e8b2fffa9fee61dad7f933be434b3339cd"
     }
   ]
 }

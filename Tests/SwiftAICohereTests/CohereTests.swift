@@ -64,7 +64,7 @@ import SwiftAI
 
     let request = try #require(await transport.requests().first)
     #expect(request.headers["authorization"] == "Bearer cohere-key")
-    #expect(request.headers["user-agent"] == "custom-client/1.0 ai-sdk-cohere/4.0.69")
+    #expect(request.headers["user-agent"] == "custom-client/1.0 ai-sdk-cohere/4.0.73")
 }
 
 @Test func cohereLanguageMapsTopLevelReasoningLikeUpstreamV4() async throws {
@@ -102,7 +102,7 @@ import SwiftAI
     #expect(providerDefaultBody["thinking"] == nil)
 
     let unsupportedBody = try decodeJSONBody(try #require(requests[4].body))
-    #expect(unsupportedBody["thinking"] == nil)
+    #expect(unsupportedBody["thinking"] == ["type": "enabled"])
     #expect(unsupported.warnings == [
         AIWarning(
             type: "unsupported",

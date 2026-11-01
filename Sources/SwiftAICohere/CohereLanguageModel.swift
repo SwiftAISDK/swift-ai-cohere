@@ -305,17 +305,15 @@ func cohereThinking(reasoning: String?, options: inout [String: JSONValue], warn
     if reasoning == "none" {
         return .object(["type": .string("disabled")])
     }
-    guard let tokenBudget = mapReasoningToProviderBudget(
+    let tokenBudget = mapReasoningToProviderBudget(
         reasoning: reasoning,
         maxOutputTokens: 32768,
         maxReasoningBudget: 32768,
         warnings: &warnings
-    ) else {
-        return nil
-    }
+    )
     return .object([
         "type": .string("enabled"),
-        "token_budget": .number(Double(tokenBudget))
+        "token_budget": tokenBudget.map { .number(Double($0)) }
     ])
 }
 

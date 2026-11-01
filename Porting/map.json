@@ -29,7 +29,9 @@
       "Tests/SwiftAICohereTests/CohereStreamingAndOptionsTests.swift",
       "Tests/SwiftAICohereTests/CohereTests.swift",
       "Tests/SwiftAICohereTests/FixtureDownloadTransport.swift",
-      "Tests/SwiftAICohereTests/TestSupport.swift"
+      "Tests/SwiftAICohereTests/TestSupport.swift",
+      "Tests/SwiftAICohereTests/Weekly20261101BehaviorTests.swift",
+      "Tests/SwiftAICohereTests/Weekly20261101CredentialsTests.swift"
     ],
     "resources": []
   },
@@ -37,9 +39,13 @@
     {
       "kind": "native-adaptation",
       "reason": "Preserve Swift async/await, Sendable, Foundation transport and existing documented gaps; see Docs/CoreV6Parity.md and PortingStatus.md."
+    },
+    {
+      "kind": "native-adaptation",
+      "reason": "2026-11-01: integrity-verified @ai-sdk/cohere 4.0.69 -> 4.0.73 source/declarations reviewed with exact matching-release tests 612be2311464804d1e4897afacbf8f3fc2f6d9e3 -> 9b603d36186b75e58d5479445a96c76f6e2d2700; focused Weekly20261101 assertions cover the published deltas and native credential settings. Existing coarse/imported mappings and earlier gaps remain unpromoted. Native UTF-8 Data document conversion already covers upstream byte/base64 decoding; new fixtures prove Unicode and literal base64-looking text preserve the intended text/title. Portable thinking remains enabled when no budget can be mapped; it retains the warning and omits an invented budget. Add native lazy apiKeyProvider across Chat, embeddings and reranking with shared credential-aware transport and existing explicit auth precedence."
     }
   ],
-  "reviewNote": "M6: Cohere runtime and focused upstream-derived tests own their package; HTTP construction is shared, options and wire policy remain local. Prior baselines and known gaps are retained.",
+  "reviewNote": "M6: Cohere runtime and focused upstream-derived tests own their package; HTTP construction is shared, options and wire policy remain local. Prior baselines and known gaps are retained. 2026-11-01: integrity-verified @ai-sdk/cohere 4.0.69 -> 4.0.73 source/declarations reviewed with exact matching-release tests 612be2311464804d1e4897afacbf8f3fc2f6d9e3 -> 9b603d36186b75e58d5479445a96c76f6e2d2700; focused Weekly20261101 assertions cover the published deltas and native credential settings. Existing coarse/imported mappings and earlier gaps remain unpromoted.",
   "canonicalOnlyReferences": [],
   "canonicalDirectory": "Packages/swift-ai-cohere"
 }
