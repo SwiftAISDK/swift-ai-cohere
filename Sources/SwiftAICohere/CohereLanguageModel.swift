@@ -69,6 +69,7 @@ public final class CohereLanguageModel: LanguageModel, @unchecked Sendable {
                     var finishReason: String? = "interrupted"
                     var usage: TokenUsage?
                     var pendingToolCall: CoherePendingToolCall?
+                    var citationIndex = 0
                     var activeTextIDs: Set<String> = []
                     var activeReasoningIDs: Set<String> = []
                     eventLoop: for try await event in serverSentEvents(from: response.body) {
@@ -119,6 +120,13 @@ public final class CohereLanguageModel: LanguageModel, @unchecked Sendable {
                                 continuation.yield(.reasoningEnd(id: id))
                             } else if activeTextIDs.remove(id) != nil {
                                 continuation.yield(.textEnd(id: id))
+                            }
+                        case "citation-start":
+                            if let value = raw["delta"]?["message"]?["citations"], value != .null {
+                                let list = value.arrayValue == nil ? JSONValue.array([value]) : value
+                                let sources = cohereSources(from: list, startIndex: citationIndex)
+                                citationIndex += list.arrayValue?.count ?? 0
+                                for source in sources { continuation.yield(.source(source)) }
                             }
                         case "tool-call-start":
                             let toolCall = raw["delta"]?["message"]?["tool_calls"]
@@ -440,7 +448,7 @@ func cohereAssistantToolCallJSON(_ part: AIContentPart) -> JSONValue? {
         "type": .string("function"),
         "function": .object([
             "name": .string(call.name),
-            "arguments": .string(call.arguments)
+            "arguments": .string(cohereSerializeToolCallArguments(call.arguments))
         ])
     ])
 }
@@ -552,19 +560,19 @@ func cohereToolCalls(from value: JSONValue?) -> [AIToolCall] {
     } ?? []
 }
 
-func cohereSources(from value: JSONValue?) -> [AISource] {
-    value?.arrayValue?.enumerated().map { index, citation in
-        let document = citation["sources"]?[0]?["document"]
+func cohereSources(from value: JSONValue?, startIndex: Int = 0) -> [AISource] {
+    value?.arrayValue?.enumerated().compactMap { index, citation in
+        guard let document = citation["sources"]?.arrayValue?.compactMap({ $0["document"]?.objectValue }).first else { return nil }
         var metadata: [String: JSONValue] = [:]
-        if let start = citation["start"] { metadata["start"] = start }
-        if let end = citation["end"] { metadata["end"] = end }
-        if let text = citation["text"] { metadata["text"] = text }
-        if let sources = citation["sources"] { metadata["sources"] = sources }
-        if let citationType = citation["type"] { metadata["citationType"] = citationType }
+        if let start = citation["start"], start != .null { metadata["start"] = start }
+        if let end = citation["end"], end != .null { metadata["end"] = end }
+        if let text = citation["text"], text != .null { metadata["text"] = text }
+        if let sources = citation["sources"], sources != .null { metadata["sources"] = sources }
+        if let citationType = citation["type"], citationType != .null { metadata["citationType"] = citationType }
         return AISource(
-            id: "cohere-citation-\(index)",
+            id: "cohere-citation-\(startIndex + index)",
             sourceType: "document",
-            title: document?["title"]?.stringValue ?? "Document",
+            title: document["title"]?.stringValue.flatMap { $0.isEmpty ? nil : $0 } ?? "Document",
             mediaType: "text/plain",
             providerMetadata: ["cohere": .object(metadata)],
             rawValue: citation
@@ -585,18 +593,19 @@ func cohereToolArguments(_ arguments: String) -> String {
 }
 
 func cohereTokenUsage(from raw: JSONValue) -> TokenUsage? {
-    guard let usage = raw["usage"], let tokens = usage["tokens"] else { return nil }
-    let inputTokens = tokens["input_tokens"]?.intValue
+    guard let usage = raw["usage"], usage != .null else { return nil }
+    let tokens = usage["tokens"]
+    let inputTokens = tokens?["input_tokens"]?.intValue
     let cachedTokens = usage["cached_tokens"]?.intValue
     return TokenUsage(
         inputTokens: inputTokens,
-        outputTokens: tokens["output_tokens"]?.intValue,
-        totalTokens: (tokens["input_tokens"]?.intValue).flatMap { input in
-            (tokens["output_tokens"]?.intValue).map { input + $0 }
+        outputTokens: tokens?["output_tokens"]?.intValue,
+        totalTokens: (tokens?["input_tokens"]?.intValue).flatMap { input in
+            (tokens?["output_tokens"]?.intValue).map { input + $0 }
         },
         inputTokensNoCache: inputTokens.map { $0 - (cachedTokens ?? 0) },
         inputTokensCacheRead: cachedTokens,
-        outputTextTokens: tokens["output_tokens"]?.intValue,
+        outputTextTokens: tokens?["output_tokens"]?.intValue,
         rawValue: usage
     )
 }
@@ -609,4 +618,9 @@ func cohereResponseMetadata(from raw: JSONValue? = nil, response: AIHTTPResponse
         headers: response.headers,
         body: raw
     )
+}
+
+private func cohereSerializeToolCallArguments(_ input: String) -> String {
+    if (try? decodeJSONBody(Data(input.utf8))) != nil { return input }
+    return canonicalJSONText(.string(input)) ?? input
 }

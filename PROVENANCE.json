@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "package": "swift-ai-cohere",
-  "version": "1.1.0",
-  "releaseID": "weekly-upstream-20261101",
+  "version": "1.2.0",
+  "releaseID": "weekly-upstream-20261108",
   "source": {
-    "commit": "ea057797494ab9bb66df8c6bfd8edc10245b20e7",
-    "baseCommit": "ea057797494ab9bb66df8c6bfd8edc10245b20e7",
+    "commit": "8e233ff96fb809445aff9a5c06bb6149a24b94da",
+    "baseCommit": "8e233ff96fb809445aff9a5c06bb6149a24b94da",
     "workingTree": false,
-    "inputsSHA256": "b46f3e07b0a583d6fee81035987d74a06fc5c6109cbdf228144d1172d2c3676e"
+    "inputsSHA256": "987359720075cb67dd8bc45bdc049aee4c5d5a42b67a7eb148e697ce5d18bd77"
   },
   "dependencies": [
     {
@@ -17,22 +17,22 @@
   ],
   "changes": [
     {
-      "id": "weekly-upstream-20261101",
-      "notes": "Native UTF-8 Data document conversion already covers upstream byte/base64 decoding; new fixtures prove Unicode and literal base64-looking text preserve the intended text/title. Portable thinking remains enabled when no budget can be mapped; it retains the warning and omits an invented budget. Reviewed upstream: @ai-sdk/cohere 4.0.69 to 4.0.73. Validation passed: node Scripts/test-packages.mjs (all 52 owning package suites and the compatibility facade); node Scripts/sdk.mjs generate --check; node --test Scripts/tests/*.test.cjs (27 passed); docs-site check and build (100 pages). Live provider calls were not run.",
-      "compatibility": "Minor release for additive native API; existing static settings and call sites remain compatible. Updated direct dependency minimums are recorded in the manifest. Existing documented JS/framework and native product gaps remain; version-delta review does not imply full parity or live-service testing. Explicit custom authentication skips an unused credential supplier, a deliberate native callback-order adaptation."
+      "id": "weekly-upstream-20261108",
+      "notes": "Add streamed/partial document citations, optional usage and response-id handling, plus valid/raw tool argument replay fixes. Reviewed published upstream delta: @ai-sdk/cohere 4.0.73 to 4.0.78. Validation passed: node Scripts/test-packages.mjs (all 52 owning packages plus the complete local facade; 3,965 reported tests and 33 explicit live skips); node Scripts/sdk.mjs dev test; node Scripts/sdk.mjs generate --check; node --test Scripts/tests/*.test.cjs (27 passed); core/provider isolation and version resolution; 52 deterministic package exports, 106 catalog consumers and four additional exact retained-minimum graphs; docs-site install/check/build (100 pages); git diff --check. No paid live-service calls were run. The publication pipeline requires successful Swift 6.3.3 CI at the exact canonical source before publishing.",
+      "compatibility": "Minor release for additive native functionality under the project convention. Existing call sites and exact old selectors are retained. Direct minimums change only for concrete API use or required inherited behavior. Version-delta review does not establish full-package parity or live-service acceptance."
     }
   ],
   "canonicalDirectory": "Packages/swift-ai-cohere",
   "upstream": [
     {
       "name": "@ai-sdk/cohere",
-      "reviewedVersion": "4.0.73",
+      "reviewedVersion": "4.0.78",
       "ledgerKind": "provider",
-      "evidence": "`AIProviders.cohere`, `CohereLanguageModel`, `CohereEmbeddingModel`, `CohereRerankingModel`, `CohereMistralVoyageTests.swift`; 2026-11-01 delta: Docs/WeeklyUpstreamAudit20261101.json",
+      "evidence": "`AIProviders.cohere`, `CohereLanguageModel`, `CohereEmbeddingModel`, `CohereRerankingModel`, `CohereMistralVoyageTests.swift`; 2026-11-01 delta: Docs/WeeklyUpstreamAudit20261101.json; 2026-11-08 delta: Docs/WeeklyUpstreamAudit20261108.json",
       "reviewStatus": "imported-reviewed-with-gaps",
-      "archiveIntegrity": "sha512-zsF4pg1Ssnnc1OCwjTt7wJwNQp2jsIm+/dBE+B5OcB+on9EUkBWvk4lfFYjdztP71nvVuGkAkf7BonQEhVpo7w==",
-      "sourceRef": "npm:@ai-sdk/cohere@4.0.73",
-      "testRef": "9b603d36186b75e58d5479445a96c76f6e2d2700",
+      "archiveIntegrity": "sha512-qhM+PT8PQ95AkaWsXi8Zbe9PEC6HEwvtxYjJ4Y1E5/a6gk8XVivl/AZIk8QE1+hWAnnAYSu5k79e7VEM9icaWA==",
+      "sourceRef": "npm:@ai-sdk/cohere@4.0.78",
+      "testRef": "0f3a85f92d1ce06ccde01d662407ef83e097a712",
       "testRefRelationship": "matching-release",
       "contractFamilies": [
         "EmbeddingModelV4",
@@ -40,7 +40,7 @@
         "ProviderV4",
         "RerankingModelV4"
       ],
-      "contractReview": "2026-11-01: published declarations, source and exact matching-release changed tests reviewed; scoped dispositions and Swift translations are in Docs/WeeklyUpstreamAudit20261101.json. Existing broader product gaps remain; reviewed delta is not full-package parity."
+      "contractReview": "2026-11-08: published declarations/source and exact matching-release changed tests reviewed; native implementations, per-file dispositions and broader retained gaps are recorded in Docs/WeeklyUpstreamAudit20261108.json. Reviewed delta is not full-package or live-service parity."
     }
   ],
   "note": "Independent port. Imported test refs and contract review gaps retain their original status; export is not new upstream parity proof.",
@@ -59,11 +59,11 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Porting/map.json",
-      "sha256": "edcb8a2248378bca16ed945633944da9f02f742bb903b83e03c50682e5450e65"
+      "sha256": "9ceac6f8bcd70100c09598ff3c1c9652f7c6510cdbde3d265c213c44c439bebe"
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/README.md",
-      "sha256": "c39e6125056751cbd63327ec4d6d2b0b1e6499b449d28f5ed300d224af721040"
+      "sha256": "6d2979f6c1761c1233ac9904949a6eb1ff161e2ef9a93de2f522ff143486c7fc"
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Sources/SwiftAICohere/CohereEmbeddingRerankingModels.swift",
@@ -71,11 +71,11 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Sources/SwiftAICohere/CohereLanguageModel.swift",
-      "sha256": "6242cafa75c89d3fdb22de9e72f5500c8e7a493adf9c0d5f6ecf9751b7b1146f"
+      "sha256": "64428975a90e7f73e594a8aa392c5fc42f42871d5ed64029812d71ee8958b85b"
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Sources/SwiftAICohere/CohereProvider.swift",
-      "sha256": "a034c831f4cd6d9c25676e775022d74828a901e37bb8588baf837a8923d12d54"
+      "sha256": "34371e9f6777f4d4864e90785986fd042e175841fce473acb70461aef2d85415"
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereProviderOptionSchemaTests.swift",
@@ -87,7 +87,7 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereTests.swift",
-      "sha256": "c2b054921c46bcd9a189839bf3d8633bab859f7a1cdd11e030e29829b93456f6"
+      "sha256": "351bb9f9dea5b017fb6df5e89b98f373eb24af55033788bd42f02a57e0265239"
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/FixtureDownloadTransport.swift",
@@ -104,6 +104,10 @@
     {
       "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/Weekly20261101CredentialsTests.swift",
       "sha256": "b98101c461803527437970375d9b23e8b2fffa9fee61dad7f933be434b3339cd"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/Weekly20261108CitationTests.swift",
+      "sha256": "bcf9721ad28a72a5eaea167b613017c414cadc70cef339156e8515bd5a0b2461"
     }
   ]
 }

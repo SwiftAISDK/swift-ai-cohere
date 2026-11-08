@@ -3,13 +3,13 @@
   "packages": [
     {
       "name": "@ai-sdk/cohere",
-      "reviewedVersion": "4.0.73",
+      "reviewedVersion": "4.0.78",
       "ledgerKind": "provider",
-      "evidence": "`AIProviders.cohere`, `CohereLanguageModel`, `CohereEmbeddingModel`, `CohereRerankingModel`, `CohereMistralVoyageTests.swift`; 2026-11-01 delta: Docs/WeeklyUpstreamAudit20261101.json",
+      "evidence": "`AIProviders.cohere`, `CohereLanguageModel`, `CohereEmbeddingModel`, `CohereRerankingModel`, `CohereMistralVoyageTests.swift`; 2026-11-01 delta: Docs/WeeklyUpstreamAudit20261101.json; 2026-11-08 delta: Docs/WeeklyUpstreamAudit20261108.json",
       "reviewStatus": "imported-reviewed-with-gaps",
-      "archiveIntegrity": "sha512-zsF4pg1Ssnnc1OCwjTt7wJwNQp2jsIm+/dBE+B5OcB+on9EUkBWvk4lfFYjdztP71nvVuGkAkf7BonQEhVpo7w==",
-      "sourceRef": "npm:@ai-sdk/cohere@4.0.73",
-      "testRef": "9b603d36186b75e58d5479445a96c76f6e2d2700",
+      "archiveIntegrity": "sha512-qhM+PT8PQ95AkaWsXi8Zbe9PEC6HEwvtxYjJ4Y1E5/a6gk8XVivl/AZIk8QE1+hWAnnAYSu5k79e7VEM9icaWA==",
+      "sourceRef": "npm:@ai-sdk/cohere@4.0.78",
+      "testRef": "0f3a85f92d1ce06ccde01d662407ef83e097a712",
       "testRefRelationship": "matching-release",
       "contractFamilies": [
         "EmbeddingModelV4",
@@ -17,7 +17,7 @@
         "ProviderV4",
         "RerankingModelV4"
       ],
-      "contractReview": "2026-11-01: published declarations, source and exact matching-release changed tests reviewed; scoped dispositions and Swift translations are in Docs/WeeklyUpstreamAudit20261101.json. Existing broader product gaps remain; reviewed delta is not full-package parity."
+      "contractReview": "2026-11-08: published declarations/source and exact matching-release changed tests reviewed; native implementations, per-file dispositions and broader retained gaps are recorded in Docs/WeeklyUpstreamAudit20261108.json. Reviewed delta is not full-package or live-service parity."
     }
   ]
 }
