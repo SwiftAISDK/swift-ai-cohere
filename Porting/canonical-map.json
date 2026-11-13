@@ -10,6 +10,7 @@
       ],
       "tests": [
         "packages/cohere/src/cohere-chat-language-model.test.ts",
+        "packages/cohere/src/cohere-citations.test.ts",
         "packages/cohere/src/cohere-embedding-model.test.ts",
         "packages/cohere/src/cohere-prepare-tools.test.ts",
         "packages/cohere/src/convert-to-cohere-chat-prompt.test.ts",
@@ -46,5 +47,5 @@
       "reason": "2026-11-01: integrity-verified @ai-sdk/cohere 4.0.69 -> 4.0.73 source/declarations reviewed with exact matching-release tests 612be2311464804d1e4897afacbf8f3fc2f6d9e3 -> 9b603d36186b75e58d5479445a96c76f6e2d2700; focused Weekly20261101 assertions cover the published deltas and native credential settings. Existing coarse/imported mappings and earlier gaps remain unpromoted. Native UTF-8 Data document conversion already covers upstream byte/base64 decoding; new fixtures prove Unicode and literal base64-looking text preserve the intended text/title. Portable thinking remains enabled when no budget can be mapped; it retains the warning and omits an invented budget. Add native lazy apiKeyProvider across Chat, embeddings and reranking with shared credential-aware transport and existing explicit auth precedence."
     }
   ],
-  "reviewNote": "2026-11-08: published @ai-sdk/cohere 4.0.73..4.0.78 source, declarations and matching-release tests reviewed independently. Partial document citations including streams, optional usage and tool replay fixes. Delta review is not a claim of whole-provider parity; existing documented gaps remain."
+  "reviewNote": "2026-11-08: published @ai-sdk/cohere 4.0.73..4.0.78 source, declarations and matching-release tests reviewed independently. Partial document citations including streams, optional usage and tool replay fixes. Delta review is not a claim of whole-provider parity; existing documented gaps remain. 2026-11-14: reviewed @ai-sdk/cohere 4.0.78 -> 4.0.83 published archives/declarations and exact matching-release tests (0f3a85f92d1ce06ccde01d662407ef83e097a712 -> 8bc7652cdb13fc84722666eb93f45acd0d131eee). Package-specific changes, translated tests, known gaps and compatibility decisions are recorded in Docs/WeeklyUpstreamAudit20261114.json; package README describes consumer behavior. This delta review does not claim whole-package or live-service parity."
 }

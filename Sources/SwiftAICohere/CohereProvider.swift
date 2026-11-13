@@ -38,7 +38,7 @@ public final class CohereProvider: AIProvider, Sendable {
         }
         var headers = normalizeHeaders(configuration.headers)
         headers["authorization"] = headers["authorization"] ?? "Bearer \(key)"
-        headers = withUserAgentSuffix(headers, "ai-sdk-cohere/4.0.78")
+        headers = withUserAgentSuffix(headers, "ai-sdk-cohere/4.0.83")
         let baseURL = withoutTrailingSlash(configuration.baseURL ?? "https://api.cohere.com/v2")
         http = AIProviderHTTPClient(providerID: "cohere", headers: headers, transport: configuration.transport,
             url: { _, path in try providerURL("\(baseURL)\(path)", queryParams: configuration.queryParams) })
