@@ -1,5 +1,5 @@
 <!-- Generated distribution; edit the canonical repository. -->
-# swift-ai-cohere 1.2.1
+# swift-ai-cohere 1.2.2
 
 Independent Swift-native port of Vercel AI SDK. Source and upstream dispositions are in PROVENANCE.json and Porting/.
 
@@ -8,7 +8,7 @@ Independent Swift-native port of Vercel AI SDK. Source and upstream dispositions
 Add this package to your SwiftPM dependencies:
 
 ```swift
-.package(url: "https://github.com/SwiftAISDK/swift-ai-cohere.git", from: "1.2.1")
+.package(url: "https://github.com/SwiftAISDK/swift-ai-cohere.git", from: "1.2.2")
 ```
 
 Products: `SwiftAICohere`.
