@@ -29,6 +29,7 @@
       "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereProviderOptionSchemaTests.swift",
       "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereStreamingAndOptionsTests.swift",
       "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereTests.swift",
+      "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereUpstreamParityTests.swift",
       "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/FixtureDownloadTransport.swift",
       "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/TestSupport.swift",
       "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/Weekly20261101BehaviorTests.swift",

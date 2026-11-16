@@ -290,20 +290,27 @@ import SwiftAI
     #expect(body["documents"]?[1]?["data"]?["text"]?.stringValue == "{\"key\":\"value\"}")
     #expect(body["documents"]?[1]?["data"]?["title"]?.stringValue == "data.json")
 }
-@Test func cohereRejectsUnsupportedDocumentMediaTypeLikeUpstream() async throws {
-    let provider = try AIProviders.cohere(configuration: CohereProviderSettings(apiKey: "cohere-key", transport: RecordingTransport(responses: [])))
+// Upstream: "should not include mediaType in the outgoing payload (category D)".
+@Test func cohereSendsAnyNonImageFileAsDocumentWithoutMediaTypeLikeUpstream() async throws {
+    let transport = RecordingTransport(response: jsonResponse("""
+    {"id":"id-1","message":{"role":"assistant","content":[{"type":"text","text":"done"}]},"finish_reason":"COMPLETE"}
+    """))
+    let provider = try AIProviders.cohere(configuration: CohereProviderSettings(apiKey: "cohere-key", transport: transport))
     let model = try provider.languageModel("command-r-plus")
 
-    await #expect(throws: AIError.invalidArgument(
-        argument: "files",
-        message: "Media type 'application/pdf' is not supported. Supported media types are: text/* and application/json."
-    )) {
-        _ = try await model.generate(LanguageModelRequest(messages: [
-            AIMessage(role: .user, content: [
-                .file(mimeType: "application/pdf", data: Data("PDF-like content".utf8), filename: "doc.pdf")
-            ])
-        ]))
-    }
+    _ = try await model.generate(LanguageModelRequest(messages: [
+        AIMessage(role: .user, content: [
+            .text("What is this?"),
+            .file(mimeType: "application/pdf", data: Data("Some file content".utf8), filename: "document.pdf")
+        ])
+    ]))
+
+    let request = try #require(await transport.requests().first)
+    let bodyText = String(decoding: try #require(request.body), as: UTF8.self)
+    let body = try decodeJSONBody(try #require(request.body))
+    #expect(body["documents"] == [["data": ["text": "Some file content", "title": "document.pdf"]]])
+    #expect(!bodyText.contains("application/pdf"))
+    #expect(!bodyText.contains("mediaType"))
 }
 @Test func cohereLanguageKeepsImagesInlineWhileExtractingDocuments() async throws {
     let transport = RecordingTransport(response: jsonResponse("""
@@ -316,7 +323,7 @@ import SwiftAI
         AIMessage(role: .user, content: [
             .text("Use both."),
             .file(mimeType: "image/png", data: Data([0, 1, 2, 3]), filename: "image.png"),
-            .data(mimeType: "image/*", data: Data([0, 1, 2])),
+            .data(mimeType: "image", data: Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])),
             .file(mimeType: "text/plain", data: Data("Document text".utf8), filename: "note.txt")
         ])
     ]))
@@ -329,7 +336,7 @@ import SwiftAI
     #expect(content[1]["type"]?.stringValue == "image_url")
     #expect(content[1]["image_url"]?["url"]?.stringValue == "data:image/png;base64,AAECAw==")
     #expect(content[2]["type"]?.stringValue == "image_url")
-    #expect(content[2]["image_url"]?["url"]?.stringValue == "data:image/jpeg;base64,AAEC")
+    #expect(content[2]["image_url"]?["url"]?.stringValue?.hasPrefix("data:image/png;base64,") == true)
     #expect(body["documents"]?.arrayValue?.count == 1)
     #expect(body["documents"]?[0]?["data"]?["text"]?.stringValue == "Document text")
     #expect(body["documents"]?[0]?["data"]?["title"]?.stringValue == "note.txt")
@@ -415,7 +422,7 @@ import SwiftAI
     #expect(body["messages"]?[1]?["content"]?.stringValue == #"{"forecast":"sunny"}"#)
     #expect(body["messages"]?[2]?["role"]?.stringValue == "tool")
     #expect(body["messages"]?[2]?["tool_call_id"]?.stringValue == "call_denied")
-    #expect(body["messages"]?[2]?["content"]?.stringValue == "Tool execution denied.")
+    #expect(body["messages"]?[2]?["content"]?.stringValue == "Tool call execution denied.")
 }
 @Test func cohereLanguageMapsCitationSources() async throws {
     let transport = RecordingTransport(response: jsonResponse("""

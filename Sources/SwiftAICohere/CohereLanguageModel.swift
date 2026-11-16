@@ -24,13 +24,16 @@ public final class CohereLanguageModel: LanguageModel, @unchecked Sendable {
             abortSignal: request.abortSignal
         )
         let raw = response.json
+        guard cohereUsageIsValid(raw["usage"]) else {
+            throw AIError.invalidResponse(provider: providerID, message: "Invalid Cohere usage: token counts must be numbers.")
+        }
         let text = raw["message"]?["content"]?.arrayValue?.compactMap { item in
             item["type"]?.stringValue == "text" ? item["text"]?.stringValue : nil
         }.joined() ?? ""
         let reasoning = raw["message"]?["content"]?.arrayValue?.compactMap { item in
             item["type"]?.stringValue == "thinking" ? item["thinking"]?.stringValue : nil
         }.joined() ?? ""
-        let toolCalls = cohereToolCalls(from: raw["message"]?["tool_calls"])
+        let toolCalls = cohereGeneratedToolCalls(from: raw["message"]?["tool_calls"])
         guard !text.isEmpty || !reasoning.isEmpty || raw["message"] != nil else {
             throw AIError.invalidResponse(provider: providerID, message: "No Cohere message content found.")
         }
@@ -157,17 +160,27 @@ public final class CohereLanguageModel: LanguageModel, @unchecked Sendable {
                                 continuation.yield(.toolCall(AIToolCall(
                                     id: pending.id,
                                     name: pending.name,
-                                    arguments: cohereToolArguments(pending.arguments),
+                                    arguments: try cohereStreamedToolArguments(pending.arguments),
                                     rawValue: pending.rawValue
                                 )))
                                 pendingToolCall = nil
                             }
                         case "message-end":
-                            finishReason = mapCohereFinishReason(raw["delta"]?["finish_reason"]?.stringValue)
-                            usage = cohereTokenUsage(from: raw["delta"] ?? raw)
+                            guard let delta = raw["delta"], cohereUsageIsValid(delta["usage"]) else {
+                                finishReason = "error"
+                                continuation.yield(.error(message: "Invalid Cohere message-end event: token counts must be numbers."))
+                                continue
+                            }
+                            finishReason = mapCohereFinishReason(delta["finish_reason"]?.stringValue)
+                            usage = cohereTokenUsage(from: delta)
                             break eventLoop
-                        default:
+                        case "citation-end", "tool-plan-delta":
                             break
+                        default:
+                            // Upstream validates chunks against a discriminated union; unknown
+                            // event types fail validation and surface as error parts.
+                            finishReason = "error"
+                            continuation.yield(.error(message: "Invalid Cohere stream event type: \(raw["type"].flatMap { $0.stringValue } ?? "missing")."))
                         }
                     }
                     for id in activeTextIDs.sorted() {
@@ -191,7 +204,7 @@ public final class CohereLanguageModel: LanguageModel, @unchecked Sendable {
     }
 
     private func body(for request: LanguageModelRequest, stream: Bool) throws -> CoherePreparedCall {
-        var warnings: [AIWarning] = []
+        var thinkingWarnings: [AIWarning] = []
         var options = try cohereProviderOptions(from: request)
         let responseFormat = cohereResolvedResponseFormat(request: request, options: &options)
         let toolChoice = request.toolChoice ?? options.removeValue(forKey: "toolChoice")
@@ -213,11 +226,12 @@ public final class CohereLanguageModel: LanguageModel, @unchecked Sendable {
         if let responseFormat {
             body["response_format"] = responseFormat
         }
-        if let thinking = cohereThinking(reasoning: request.reasoning, options: &options, warnings: &warnings) {
+        if let thinking = cohereThinking(reasoning: request.reasoning, options: &options, warnings: &thinkingWarnings) {
             body["thinking"] = thinking
         }
         let preparedTools = cohereTools(from: request.tools, only: cohereForcedToolName(from: toolChoice))
-        if !preparedTools.tools.isEmpty {
+        // Upstream sends the (possibly empty after filtering) tools array whenever tools were provided.
+        if !request.tools.isEmpty {
             body["tools"] = .array(preparedTools.tools)
             if let toolChoice = cohereToolChoice(from: toolChoice) {
                 body["tool_choice"] = toolChoice
@@ -226,8 +240,10 @@ public final class CohereLanguageModel: LanguageModel, @unchecked Sendable {
         for (key, value) in options where !["thinking", "responseFormat", "toolChoice"].contains(key) {
             body[key] = value
         }
-        warnings.append(contentsOf: preparedTools.warnings)
+        // Upstream order: tool warnings, prompt warnings, then reasoning warnings.
+        var warnings = preparedTools.warnings
         warnings.append(contentsOf: prompt.warnings)
+        warnings.append(contentsOf: thinkingWarnings)
         return CoherePreparedCall(body: body, warnings: warnings)
     }
 }
@@ -353,7 +369,8 @@ func cohereTools(from tools: [String: JSONValue], only forcedToolName: String? =
             "function": .object([
                 "name": .string(name),
                 "description": schema["description"],
-                "parameters": schema
+                // Upstream `cohere-prepare-tools` sends `tool.inputSchema` as `parameters`.
+                "parameters": aiFunctionToolInputSchema(schema)
             ])
         ])
     }
@@ -403,15 +420,12 @@ func cohereMessageJSON(_ message: AIMessage) throws -> (messages: [JSONValue], d
         if !toolCalls.isEmpty {
             output["tool_calls"] = .array(toolCalls)
         } else {
-            output["content"] = .string(message.combinedText)
+            output["content"] = .string(message.content.compactMap(\.text).joined())
         }
         return ([.object(output)], [], [])
     case .tool:
-        let toolResults = message.content.compactMap(cohereToolResultMessageJSON)
-        if !toolResults.isEmpty {
-            return (toolResults, [], [])
-        }
-        return ([.object(["role": .string("tool"), "content": .string(message.combinedText)])], [], [])
+        // Upstream maps tool results only; approval responses produce no message.
+        return (message.content.compactMap(cohereToolResultMessageJSON), [], [])
     case .user:
         let hasImage = message.content.contains {
             if let payload = $0.filePayload { return cohereIsImageMediaType(payload.mimeType) }
@@ -464,11 +478,15 @@ func cohereToolResultMessageJSON(_ part: AIContentPart) -> JSONValue? {
 
 func cohereToolResultContent(_ result: AIToolResult) -> String {
     let output = result.modelOutput ?? result.result
+    // A plain string tool output becomes a `text` model output upstream.
+    if let text = output.stringValue {
+        return text
+    }
     switch output["type"]?.stringValue {
     case "text", "error-text":
         return output["value"]?.stringValue ?? ""
     case "execution-denied":
-        return output["reason"]?.stringValue ?? "Tool execution denied."
+        return output["reason"]?.stringValue ?? "Tool call execution denied."
     case "content", "json", "error-json":
         if let value = output["value"] {
             return cohereJSONString(value) ?? value.stringValue ?? ""
@@ -480,8 +498,7 @@ func cohereToolResultContent(_ result: AIToolResult) -> String {
 }
 
 func cohereJSONString(_ value: JSONValue) -> String? {
-    guard let data = try? JSONEncoder().encode(value) else { return nil }
-    return String(data: data, encoding: .utf8)
+    try? decisionJSONText(value)
 }
 
 func cohereContentPartJSON(_ part: AIContentPart) throws -> JSONValue? {
@@ -490,14 +507,15 @@ func cohereContentPartJSON(_ part: AIContentPart) throws -> JSONValue? {
         return text.isEmpty ? nil : .object(["type": .string("text"), "text": .string(text)])
     case let .reasoning(text, _):
         return text.isEmpty ? nil : .object(["type": .string("text"), "text": .string(text)])
-    case let .imageURL(url, _):
-        return .object(["type": .string("image_url"), "image_url": .object(["url": .string(url)])])
-    case let .data(mimeType, data, _) where cohereIsImageMediaType(mimeType),
-         let .file(mimeType, data, _, _) where cohereIsImageMediaType(mimeType):
-        return .object([
-            "type": .string("image_url"),
-            "image_url": .object(["url": .string("data:\(cohereImageDataURLMediaType(mimeType));base64,\(data.base64EncodedString())")])
-        ])
+    case let .imageURL(url, providerMetadata):
+        return try cohereImageURLPart(url: url, providerMetadata: providerMetadata)
+    case let .data(mimeType, data, providerMetadata) where cohereIsImageMediaType(mimeType),
+         let .file(mimeType, data, _, providerMetadata) where cohereIsImageMediaType(mimeType):
+        let mediaType = try resolveFullMediaType(mediaType: mimeType, data: data)
+        return try cohereImageURLPart(
+            url: "data:\(mediaType);base64,\(data.base64EncodedString())",
+            providerMetadata: providerMetadata
+        )
     case .providerReference:
         throw AIError.invalidArgument(
             argument: "files",
@@ -508,15 +526,24 @@ func cohereContentPartJSON(_ part: AIContentPart) throws -> JSONValue? {
     }
 }
 
+func cohereImageURLPart(url: String, providerMetadata: [String: JSONValue]) throws -> JSONValue {
+    var imageURL: [String: JSONValue] = ["url": .string(url)]
+    if let detail = providerMetadata["cohere"]?["detail"], detail != .null {
+        guard let value = detail.stringValue, ["auto", "low", "high"].contains(value) else {
+            throw AIError.invalidArgument(
+                argument: "providerOptions.cohere.detail",
+                message: "Cohere image detail must be auto, low, or high."
+            )
+        }
+        imageURL["detail"] = detail
+    }
+    return .object(["type": .string("image_url"), "image_url": .object(imageURL)])
+}
+
 func cohereDocumentJSON(_ part: AIContentPart) throws -> JSONValue? {
+    // Upstream turns every non-image file into a text document without reading its media type.
     guard let payload = part.filePayload, !cohereIsImageMediaType(payload.mimeType) else {
         return nil
-    }
-    guard payload.mimeType.hasPrefix("text/") || payload.mimeType == "application/json" else {
-        throw AIError.invalidArgument(
-            argument: "files",
-            message: "Media type '\(payload.mimeType)' is not supported. Supported media types are: text/* and application/json."
-        )
     }
     var data: [String: JSONValue] = [
         "text": .string(String(decoding: payload.data, as: UTF8.self))
@@ -529,9 +556,6 @@ func cohereIsImageMediaType(_ mediaType: String) -> Bool {
     mediaType == "image" || mediaType.hasPrefix("image/")
 }
 
-func cohereImageDataURLMediaType(_ mediaType: String) -> String {
-    mediaType == "image" || mediaType == "image/*" ? "image/jpeg" : mediaType
-}
 
 func mapCohereFinishReason(_ reason: String?) -> String? {
     switch reason {
@@ -546,18 +570,6 @@ func mapCohereFinishReason(_ reason: String?) -> String? {
     default:
         return "other"
     }
-}
-
-func cohereToolCalls(from value: JSONValue?) -> [AIToolCall] {
-    value?.arrayValue?.enumerated().compactMap { index, item in
-        guard let name = item["function"]?["name"]?.stringValue else { return nil }
-        return AIToolCall(
-            id: item["id"]?.stringValue ?? "tool-call-\(index)",
-            name: name,
-            arguments: cohereToolArguments(item["function"]?["arguments"]?.stringValue ?? ""),
-            rawValue: item
-        )
-    } ?? []
 }
 
 func cohereSources(from value: JSONValue?, startIndex: Int = 0) -> [AISource] {
@@ -580,16 +592,44 @@ func cohereSources(from value: JSONValue?, startIndex: Int = 0) -> [AISource] {
     } ?? []
 }
 
-func cohereToolArguments(_ arguments: String) -> String {
+/// Generate path: upstream only replaces the literal `null` with `{}` and keeps other arguments verbatim.
+func cohereGeneratedToolCalls(from value: JSONValue?) -> [AIToolCall] {
+    value?.arrayValue?.enumerated().compactMap { index, item in
+        guard let name = item["function"]?["name"]?.stringValue else { return nil }
+        let arguments = item["function"]?["arguments"]?.stringValue ?? ""
+        return AIToolCall(
+            id: item["id"]?.stringValue ?? "tool-call-\(index)",
+            name: name,
+            arguments: arguments == "null" ? "{}" : arguments,
+            rawValue: item
+        )
+    } ?? []
+}
+
+/// Stream path: upstream parses the accumulated arguments (empty -> `{}`), rejects invalid JSON or
+/// prototype keys by failing the stream, maps `null` to `{}` and re-serializes the parsed value.
+func cohereStreamedToolArguments(_ arguments: String) throws -> String {
     let trimmed = arguments.trimmingCharacters(in: .whitespacesAndNewlines)
-    if trimmed.isEmpty || trimmed == "null" {
-        return "{}"
+    let parsed = try secureJSONParse(trimmed.isEmpty ? "{}" : trimmed)
+    return try decisionJSONText(parsed == .null ? .object([:]) : parsed)
+}
+
+func cohereUsageIsValid(_ usage: JSONValue?) -> Bool {
+    guard let usage, usage != .null else { return true }
+    guard let object = usage.objectValue else { return false }
+    func isNumberOrNull(_ value: JSONValue?) -> Bool {
+        switch value {
+        case nil, .null?, .number?: return true
+        default: return false
+        }
     }
-    if let json = try? decodeJSONBody(Data(trimmed.utf8)),
-       let canonical = cohereJSONString(json) {
-        return canonical
+    for key in ["billed_units", "tokens"] {
+        guard let nested = object[key], nested != .null else { continue }
+        guard let nestedObject = nested.objectValue,
+              isNumberOrNull(nestedObject["input_tokens"]),
+              isNumberOrNull(nestedObject["output_tokens"]) else { return false }
     }
-    return trimmed
+    return isNumberOrNull(object["cached_tokens"])
 }
 
 func cohereTokenUsage(from raw: JSONValue) -> TokenUsage? {

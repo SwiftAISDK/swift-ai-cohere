@@ -1,5 +1,5 @@
 <!-- Generated distribution; edit the canonical repository. -->
-# swift-ai-cohere 1.2.2
+# swift-ai-cohere 1.3.0
 
 Independent Swift-native port of Vercel AI SDK. Source and upstream dispositions are in PROVENANCE.json and Porting/.
 
@@ -8,7 +8,7 @@ Independent Swift-native port of Vercel AI SDK. Source and upstream dispositions
 Add this package to your SwiftPM dependencies:
 
 ```swift
-.package(url: "https://github.com/SwiftAISDK/swift-ai-cohere.git", from: "1.2.2")
+.package(url: "https://github.com/SwiftAISDK/swift-ai-cohere.git", from: "1.3.0")
 ```
 
 Products: `SwiftAICohere`.
@@ -16,20 +16,29 @@ Contribute and report issues in the canonical SwiftAISDK repository.
 
 ## Authored usage guide
 
-# SwiftAICohere
+# Cohere for Swift
 
-Swift-native port of `@ai-sdk/cohere`. Maintained in the canonical SwiftAISDK repository and exported as an independent Swift package.
+`SwiftAICohere` adds Cohere to [SwiftAISDK](https://github.com/SwiftAISDK/SwiftAISDK), an independent Swift port of the Vercel AI SDK. It ports `@ai-sdk/cohere` and supports text generation, embeddings and reranking.
 
-The canonical repository owns all source edits. This package owns its provider
-configuration and wire behavior, using only the declared shared dependencies.
-Existing upstream baselines, capabilities and documented gaps remain unchanged.
-See `Porting/map.json` and the canonical provider guide.
+Provider guide with models, options, streaming and errors:
 
-See [provider usage and capabilities](https://github.com/SwiftAISDK/SwiftAISDK/blob/main/docs-site/scripts/provider-guides/cohere.md) for authentication, options and supported surfaces.
-## Behavior notes
+- [Cohere](https://swiftaisdk.github.io/SwiftAISDK/providers/cohere/)
 
-Partial document citations are accepted, including streaming `citation-start` events. Tool-only citations remain in the raw response and do not produce document sources. Response metadata prefers the v2 `id`; missing token usage stays unknown, while billed units remain in raw usage. Tool replay preserves valid JSON argument text and quotes malformed text as a JSON string.
+## Usage
 
-## Current upstream review
+Add the `SwiftAI` product from `swift-ai-core` and the `SwiftAICohere` product from this package to your target, then create the provider:
 
-The reviewed baseline is `@ai-sdk/cohere` 4.0.83. Published runtime source, declarations and matching-release tests are unchanged from 4.0.78 apart from dependency/version propagation. The user-agent suffix now identifies the reviewed npm baseline. Existing partial citations, usage and streaming behavior are retained; no broader parity claim is added.
+```swift
+import SwiftAI
+import SwiftAICohere
+
+let provider = try AIProviders.cohere(configuration: CohereProviderSettings())
+```
+
+By default the provider reads `COHERE_API_KEY` from the environment; values set in `CohereProviderSettings` take precedence.
+
+To use every provider through one dependency, add the complete [SwiftAISDK](https://github.com/SwiftAISDK/SwiftAISDK) package instead; see [Install](https://swiftaisdk.github.io/SwiftAISDK/getting-started/install/).
+
+## Contributing
+
+This package is exported from `Packages/swift-ai-cohere` in the canonical [SwiftAISDK](https://github.com/SwiftAISDK/SwiftAISDK) repository. Open issues and pull requests there.
