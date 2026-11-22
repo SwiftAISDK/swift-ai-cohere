@@ -64,7 +64,7 @@ import SwiftAI
 
     let request = try #require(await transport.requests().first)
     #expect(request.headers["authorization"] == "Bearer cohere-key")
-    #expect(request.headers["user-agent"] == "custom-client/1.0 ai-sdk-cohere/4.0.84")
+    #expect(request.headers["user-agent"] == "custom-client/1.0 ai-sdk-cohere/4.0.86")
 }
 
 @Test func cohereLanguageMapsTopLevelReasoningLikeUpstreamV4() async throws {

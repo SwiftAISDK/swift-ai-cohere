@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "package": "swift-ai-cohere",
-  "version": "1.3.0",
-  "releaseID": "upstream-parity-20261116",
+  "version": "1.3.1",
+  "releaseID": "weekly-upstream-20261122",
   "source": {
-    "commit": "1c457dea36be42376a6853aecd5c48ffc4942178",
-    "baseCommit": "1c457dea36be42376a6853aecd5c48ffc4942178",
+    "commit": "73e28c7d4106338c3030bc36700c5922aeb2ebd9",
+    "baseCommit": "73e28c7d4106338c3030bc36700c5922aeb2ebd9",
     "workingTree": false,
-    "inputsSHA256": "d7b8f52add7828d7e9ed20418fe072e7db03e75483a168bb7f5c34e9d2a04a13"
+    "inputsSHA256": "5b64cfae284ecf9a081f1c08d5b5dff83915b3c57b62669a3408e51a52961cb5"
   },
   "dependencies": [
     {
@@ -17,22 +17,22 @@
   ],
   "changes": [
     {
-      "id": "upstream-parity-20261116",
-      "notes": "PDF and other files are sent as documents, image types and `detail` match upstream, tool messages and approval handling match upstream, streamed tool arguments are validated and function tools send only their input schema.",
-      "compatibility": "Source-compatible; changes are additive. Request bodies, results, warnings and errors change to match the reviewed upstream package."
+      "id": "weekly-upstream-20261122",
+      "notes": "Align the provider request identity with @ai-sdk/cohere 4.0.86 after comparing source, declarations and matching-release tests against 4.0.84. Offline validation passed: node Scripts/test-packages.mjs (56 packages, 3672 owning tests and 1760 compatibility tests), generation, tooling, isolation, and version selection. See Docs/Archive/WeeklyUpstreamAudit20261122.md for retained gaps. Paid provider calls were skipped.",
+      "compatibility": "Source-compatible request-header update."
     }
   ],
   "canonicalDirectory": "Packages/swift-ai-cohere",
   "upstream": [
     {
       "name": "@ai-sdk/cohere",
-      "reviewedVersion": "4.0.84",
+      "reviewedVersion": "4.0.86",
       "ledgerKind": "provider",
-      "evidence": "`AIProviders.cohere`, `CohereLanguageModel`, `CohereEmbeddingModel`, `CohereRerankingModel`, `CohereMistralVoyageTests.swift`; 2026-11-01 delta: Docs/Archive/WeeklyUpstreamAudit20261101.json; 2026-11-08 delta: Docs/Archive/WeeklyUpstreamAudit20261108.json; 2026-11-14 delta: Docs/Archive/WeeklyUpstreamAudit20261114.json; 2026-11-15 delta: Docs/Archive/WeeklyUpstreamAudit20261115.json",
+      "evidence": "`AIProviders.cohere`, `CohereLanguageModel`, `CohereEmbeddingModel`, `CohereRerankingModel`, `CohereMistralVoyageTests.swift`; 2026-11-01 delta: Docs/Archive/WeeklyUpstreamAudit20261101.json; 2026-11-08 delta: Docs/Archive/WeeklyUpstreamAudit20261108.json; 2026-11-14 delta: Docs/Archive/WeeklyUpstreamAudit20261114.json; 2026-11-15 delta: Docs/Archive/WeeklyUpstreamAudit20261115.json; 2026-11-22 delta: Docs/Archive/WeeklyUpstreamAudit20261122.json",
       "reviewStatus": "imported-reviewed-with-gaps",
-      "archiveIntegrity": "sha512-i7jxsk4mn/fw+OYCNL3yEN91uNcOELzC3/ux2DPK3SHgcOCO8UtS96Zr/z2zCoBicR6qLJ2FNmPKHdMsS8Mmxg==",
-      "sourceRef": "npm:@ai-sdk/cohere@4.0.84",
-      "testRef": "0e8e0543aeda7d4dd4ce6eade0d5b7d5a43644c1",
+      "archiveIntegrity": "sha512-PLTEqnhzqTAVY1LY4lj9r84CZS2H3ixg/2ZmNMLjcXUnC1mg+oCn8Hwb+Yb8FTWmlzJL4WCjKW2tSdlypvgZWQ==",
+      "sourceRef": "npm:@ai-sdk/cohere@4.0.86",
+      "testRef": "3dad57f204c7332178d28c3467c7311875b66a3e",
       "testRefRelationship": "matching-release",
       "contractFamilies": [
         "EmbeddingModelV4",
@@ -40,7 +40,7 @@
         "ProviderV4",
         "RerankingModelV4"
       ],
-      "contractReview": "2026-11-15: published source/declarations and exact matching-release tests reviewed separately. Native delta scenarios, per-file dispositions, unchanged-catalog evidence and explicit remaining gaps are recorded in Docs/Archive/WeeklyUpstreamAudit20261115.json. Required checks remain a separate gate; no full-package/live-service parity claim."
+      "contractReview": "2026-11-22: reviewed the published source and declarations and the matching-release test diffs. Native evidence and explicitly retained coverage gaps are in Docs/Archive/WeeklyUpstreamAudit20261122.json."
     }
   ],
   "note": "Independent port. Imported test refs and contract review gaps retain their original status; export is not new upstream parity proof.",
@@ -75,7 +75,7 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Sources/SwiftAICohere/CohereProvider.swift",
-      "sha256": "a610ad585e48e98b80446705013423145f90bf63db5e75f412112fc439896f48"
+      "sha256": "209e69ba2b5ad9ac1986b3e29933d0fcd810b4f6ddada79d15587392c5bbbbfe"
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereProviderOptionSchemaTests.swift",
@@ -87,7 +87,7 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereTests.swift",
-      "sha256": "a7775f1c5d26d216229950f6745b03ceb1a722ada4d20a3d1a0c9adfb1beb57f"
+      "sha256": "0c7be1ef8fc651a3c68fe63244ca12128ec844efc7de2c77e1deb4c0904807a6"
     },
     {
       "canonicalPath": "Packages/swift-ai-cohere/Tests/SwiftAICohereTests/CohereUpstreamParityTests.swift",
